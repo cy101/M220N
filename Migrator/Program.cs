@@ -17,8 +17,7 @@ namespace Migrator
     {
         static IMongoCollection<Movie> _moviesCollection;
 
-        // TODO: Update this connection string as needed.
-        static string mongoConnectionString = "";
+        static string mongoConnectionString = "mongodb://192.168.101.89";
         
         static async Task Main(string[] args)
         {
@@ -37,6 +36,16 @@ namespace Migrator
                 //
                 // // bulkWriteDatesResult = await _moviesCollection.BulkWriteAsync(...
 
+                List<ReplaceOneModel<Movie>> operations = new List<ReplaceOneModel<Movie>>();
+                BulkWriteOptions options = new BulkWriteOptions() { IsOrdered = false };
+                
+                datePipelineResults.ForEach(c =>
+                {
+                    operations.Add(new ReplaceOneModel<Movie>(new BsonDocument("_id", c.Id), c) { IsUpsert = false });
+
+                });
+                bulkWriteDatesResult = await _moviesCollection.BulkWriteAsync(operations, options);
+
                 Console.WriteLine($"{bulkWriteDatesResult.ProcessedRequests.Count} records updated.");
             }
 
@@ -51,6 +60,16 @@ namespace Migrator
                 // (https://mongodb.github.io/mongo-csharp-driver/2.12/apidocs/html/T_MongoDB_Driver_ReplaceOneModel_1.htm).
                 //
                 // // bulkWriteRatingsResult = await _moviesCollection.BulkWriteAsync(...
+
+
+                List<ReplaceOneModel<Movie>> operations = new List<ReplaceOneModel<Movie>>();
+                BulkWriteOptions options = new BulkWriteOptions() { IsOrdered = false };
+
+                datePipelineResults.ForEach(c =>
+                {
+                    operations.Add(new ReplaceOneModel<Movie>(new BsonDocument("_id", c.Id), c) { IsUpsert = false });
+                });
+                bulkWriteRatingsResult = await _moviesCollection.BulkWriteAsync(operations, options);
 
                 Console.WriteLine($"{bulkWriteRatingsResult.ProcessedRequests.Count} records updated.");
             }
